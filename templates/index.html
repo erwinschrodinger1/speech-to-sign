@@ -4,10 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Audio Streaming</title>
+    <link
+      rel="stylesheet"
+      href="http://vhg.cmp.uea.ac.uk/tech/jas/vhg2021/cwa/cwasa.css"
+    />
+    <script
+      type="text/javascript"
+      src="http://vhg.cmp.uea.ac.uk/tech/jas/vhg2021/cwa/allcsa.js"
+    ></script>
+    <script language="javascript">
+      // Initial configuration
+      var initCfg = {
+        avSettings: { initAv: "anna" },
+      };
+    </script>
   </head>
-  <body>
+  <body onload="CWASA.init(initCfg);">
     <button id="startButton">Start Streaming</button>
     <button id="stopButton" style="display: none">Stop Streaming</button>
+
+    <div class="CWASAAvatar av0" align="center"></div>
+    <button onclick="startPlayer('SignFiles/hello.sigml')">Click Me</button>
 
     <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
     <script
@@ -19,7 +36,8 @@
       const startButton = document.getElementById("startButton");
       const stopButton = document.getElementById("stopButton");
       var reco;
-
+      setSiGMLURL("SignFiles/hello.sigml");
+      var socket = io();
       startButton.addEventListener("click", async () => {
         console.log("{{apiKey}}");
         const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
@@ -35,6 +53,9 @@
         reco.recognized = function (sender, recognitionEventArgs) {
           result = recognitionEventArgs.result;
           console.log(result.privText);
+          if (result.privText) {
+            socket.emit("audio", result.privText);
+          }
         };
 
         reco.startContinuousRecognitionAsync();
@@ -57,6 +78,14 @@
         startButton.style.display = "block";
         stopButton.style.display = "none";
       });
+      function playText(stext) {
+        CWASA.playSiGMLText(stext);
+      }
+
+      function startPlayer(sigmlURL) {
+        sigmlURL = setSiGMLURL(sigmlURL);
+        CWASA.playSiGMLURL(sigmlURL);
+      }
     </script>
   </body>
 </html>
