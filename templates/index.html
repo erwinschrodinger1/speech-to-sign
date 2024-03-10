@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio Streaming</title>
+  </head>
+  <body>
+    <button id="startButton">Start Streaming</button>
+    <button id="stopButton" style="display: none">Stop Streaming</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+      integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const startButton = document.getElementById("startButton");
+      const stopButton = document.getElementById("stopButton");
+      var reco;
+
+      startButton.addEventListener("click", async () => {
+        console.log("{{apiKey}}");
+        const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
+          "{{apiKey}}",
+          "{{region}}"
+        );
+        speechConfig.speechRecognitionLanguage = "en-US";
+
+        const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+
+        reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+
+        reco.recognized = function (sender, recognitionEventArgs) {
+          result = recognitionEventArgs.result;
+          console.log(result.privText);
+        };
+
+        reco.startContinuousRecognitionAsync();
+
+        startButton.style.display = "none";
+        stopButton.style.display = "block";
+      });
+
+      stopButton.addEventListener("click", async () => {
+        reco.stopContinuousRecognitionAsync(
+          function () {
+            reco.close();
+            reco = undefined;
+          },
+          function (err) {
+            reco.close();
+            reco = undefined;
+          }
+        );
+        startButton.style.display = "block";
+        stopButton.style.display = "none";
+      });
+    </script>
+  </body>
+</html>
